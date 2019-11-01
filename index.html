@@ -5,15 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <title>Auto Suggest Ahead WTF!!!</title>
-</head>
-<body>
+    <style>
+        html {
+            box-sizing: border-box;
+        }
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        .form-container {
+            width: 400px;
+            margin: 40px auto;
+        }
 
+        input{
+            width: 100%;
+        }
+
+        ul.suggestions {
+            padding:0;
+            list-style: none;
+            margin: 5px 0;
+            border: 4px dashed #e7d0a2;
+        }
+        ul.suggestions:empty {
+            border:none;
+        }
+        input.search{
+            border: 8px solid olivedrab;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 42px;
+            text-align: center;
+            outline: 0;
+        }
+        input.search:focus{
+            box-shadow: 10px 10px 8px 3px rgba(0,0,0,0.75);
+        }
+        li.suggestion {
+            padding: 10px 10px;
+        }
+        li.suggestion:nth-child(even) {
+            background: #C8A2C8;
+        }
+        li.suggestion:nth-child(odd) {
+            background: #acaaaa;
+        }
+    </style>
+</head>
+
+<body>
+<form>
+    <div class="form-container">
+        <div>
+            <input class="search" id="search" type="text">
+            <ul class="suggestions"></ul>
+        </div>
+    </div> 
+</form>
 <script>
-const citiesEndpoint = "https://gist.githubusercontent.com/koramit/594b1b217cf6b5d1bf084fa27de09b8d/raw/5f73f96dbad9aac88951c1e1a2c6804df3487a9b/thai-subDistricts.json";
-const cities = [];
-fetch(citiesEndpoint)
-    .then(blob => blob.json())
-    .then(data => cities.push(...data));
+    const citiesEndpoint = "https://gist.githubusercontent.com/koramit/594b1b217cf6b5d1bf084fa27de09b8d/raw/5f73f96dbad9aac88951c1e1a2c6804df3487a9b/thai-subDistricts.json";
+    const cities = [];
+        fetch(citiesEndpoint)
+            .then(blob => blob.json())
+            .then(data => cities.push(...data));
+    const inputSearch = document.querySelector("#search")
+    
+
+    function searchCities () {
+        let ul = document.querySelector("ul.suggestions")
+        if(this.value.length < 3 ) {
+            ul.innerHTML = "";
+            return ;
+        }
+        let matchArray =cities.filter(c=>{
+            if(
+                c.district.indexOf(this.value) > -1 ||
+                c.amphoe.indexOf(this.value) > -1 ||
+                c.province.indexOf(this.value) > -1 ||
+                (c.zipcode +"") .indexOf(this.value) > -1
+        
+            ) return true
+        })
+        console.table(matchArray)
+        
+        let items = matchArray.slice(0, 15).map(c => {
+            let label = `${c.district} > ${c.amphoe} > ${c.province} > ${c.zipcode}`
+            return `<li class="suggestion">${label}</li>`
+        })
+        ul.innerHTML = items.join("");
+    }
+    inputSearch.addEventListener("input", searchCities)
 </script>
 </body>
 </html>
