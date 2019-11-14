@@ -26,9 +26,16 @@
             list-style: none;
             margin: 5px 0;
             border: 4px dashed #e7d0a2;
+            max-height: 300px;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            position: absolute;
+            width: 100%;
+            transition: 5s max-height ease-in-out;
         }
         ul.suggestions:empty {
             border:none;
+            max-height: 0;
         }
         input.search{
             border: 8px solid olivedrab;
@@ -43,6 +50,8 @@
         }
         li.suggestion {
             padding: 10px 10px;
+            cursor: pointer;
+            transition: 1.5s all ease;
         }
         li.suggestion:nth-child(even) {
             background: #C8A2C8;
@@ -50,16 +59,25 @@
         li.suggestion:nth-child(odd) {
             background: #acaaaa;
         }
+        li.suggestion:hover {
+            background: #FFFFFF;
+            transform: scale(1.1);
+        }
+        .hl{
+            color: red;
+            background: #00ff00;
+        }
     </style>
 </head>
 
 <body>
 <form>
     <div class="form-container">
-        <div>
-            <input class="search" id="search" type="text">
+        <div style="position: relative;">
+            <input class="search" id="search" type="text" autocomplete="false">
             <ul class="suggestions"></ul>
         </div>
+        <div id="result">Search Result</div>
     </div> 
 </form>
 <script>
@@ -69,12 +87,17 @@
             .then(blob => blob.json())
             .then(data => cities.push(...data));
     const inputSearch = document.querySelector("#search")
+    const ul = document.querySelector("ul.suggestions");
+    const result = document.getElementById("result");
+    let selectedItemcode = 0;
+
     
 
     function searchCities () {
-        let ul = document.querySelector("ul.suggestions")
+
         if(this.value.length < 3 ) {
             ul.innerHTML = "";
+            result.innerText = "Search Result"
             return ;
         }
         let matchArray =cities.filter(c=>{
@@ -90,11 +113,23 @@
         
         let items = matchArray.slice(0, 15).map(c => {
             let label = `${c.district} > ${c.amphoe} > ${c.province} > ${c.zipcode}`
-            return `<li class="suggestion">${label}</li>`
+            let formattedLabel = label.replace(this.value, `<span class="hl">${this.value}</span>`);
+            return `
+                <li class="suggestion" onclick="select(event)" data-code="${c.district_code}" data-label="${label}">
+                    ${formattedLabel}
+                </li>
+            `
         })
         ul.innerHTML = items.join("");
     }
+    function select(event) {
+        document.getElementById("result").innerText = event.target.innerText;
+        selectedItemcode =event.target.dataset.code;
+        console.log(selectedItemcode);
+        ul.innerHTML = "";
+    }
     inputSearch.addEventListener("input", searchCities)
+
 </script>
 </body>
 </html>
